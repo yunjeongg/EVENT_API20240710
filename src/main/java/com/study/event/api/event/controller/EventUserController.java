@@ -34,5 +34,17 @@ public class EventUserController {
         // aaa@gmail.com 에 application.yml에서 작성한 이메일로부터 인증코드 메일 가는걸 확인할 수 있다.
     }
 
+    // 인증 코드 검증 API
+    @GetMapping("/code")
+    public ResponseEntity<?> verifyCode(String email, String code) {
 
+        log.info("{}'s verify code is [ {} ]", email, code);
+        boolean isMatch = eventUserService.isMatchCode(email, code);
+
+        return ResponseEntity.ok().body(isMatch);
+
+        // postman
+        // get, http://localhost:8787/auth/code?email=aaa@gmail.com&code=이메일에서 받은 코드
+        // 이메일 없을 경우 false, 있으면 true
+    }
 }

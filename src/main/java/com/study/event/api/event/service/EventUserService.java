@@ -112,4 +112,28 @@ public class EventUserService {
     private String generateVerificationCode() {
         return String.valueOf((int) (Math.random() * 9000 + 1000));
     }
+
+    // 인증코드 체크
+    public boolean isMatchCode(String email, String code) {
+
+        // 이메일을 통해 회원정보를 탐색
+        EventUser eventUser = eventUserRepository.findByEmail(email)
+                .orElse(null);
+
+        if (eventUser != null) {
+            // 인증코드가 있는지 탐색
+            EmailVerification ev = emailVerificationRepository.findByEventUser(eventUser).orElse(null);
+
+            // 인증코드가 있고 만료시간이 지나지 않았고 코드번호가 일치할 경우
+            if (
+                    ev != null
+                            && ev.getExpiryDate().isAfter(LocalDateTime.now())
+                            && code.equals(ev.getVerificationCode())
+            ) {
+                return true;
+            }
+
+        }
+        return false;
+    }
 }
