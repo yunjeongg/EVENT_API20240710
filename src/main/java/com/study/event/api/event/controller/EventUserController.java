@@ -1,12 +1,11 @@
 package com.study.event.api.event.controller;
 
+import com.study.event.api.event.dto.request.EventUserSaveDto;
 import com.study.event.api.event.service.EventUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -46,5 +45,28 @@ public class EventUserController {
         // postman
         // get, http://localhost:8787/auth/code?email=aaa@gmail.com&code=이메일에서 받은 코드
         // 이메일 없을 경우 false, 있으면 true
+    }
+
+    // 회원가입 마무리 처리
+    @PostMapping("/join")
+    public ResponseEntity<?> join(@RequestBody EventUserSaveDto dto) {
+
+        log.info("saved User Info - {}", dto);
+
+        try {
+            eventUserService.confirmSignUp(dto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+        return ResponseEntity.ok().body("saved success");
+
+        // post, Body - raw - JSON, http://localhost:8787/auth/join
+        /*
+            {
+                "email": "aaa@gmail.com",
+                "password": "abc1234!"
+            }
+         */
     }
 }
