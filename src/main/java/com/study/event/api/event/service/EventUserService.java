@@ -41,10 +41,38 @@ public class EventUserService {
         boolean exists = eventUserRepository.existsByEmail(email);
         log.info("Checking email {} is duplicate : {}", email, exists);
 
+        // 중복인데 회원가입이 마무리되지 않은 회원은 중복이 아니라고 판단한다.
+        if (exists && notFinish(email)) {
+
+            return false;
+        }
+
         // 일련의 후속 처리 (데이터베이스 처리, 이메일 보내는 것...)
         if (!exists) processSignUp(email);
 
         return exists;
+    }
+
+    private boolean notFinish(String email) {
+
+        // 해당 회원을 찾기
+        EventUser eventUser = eventUserRepository.findByEmail(email).orElseThrow();
+
+        if (!eventUser.isEmailVerified() || eventUser.getPassword() == null) { // 이메일인증이 안끝났거나 비밀번호가 없는경우
+
+            // 해당 회원의 인증코드
+            EmailVerification ev = emailVerificationRepository.findByEventUser(eventUser).orElse(null);
+
+            if (ev != null) { // 인증코드가 없는게 아니면 인증코드 삭제하기
+                emailVerificationRepository.delete(ev);
+            }
+
+            // 인증코드 재발송하기
+            generateAndSendCode(email, eventUser);
+
+            return true;
+        }
+        return false; // 중복이 아니다.
     }
 
     public void processSignUp(String email) {
