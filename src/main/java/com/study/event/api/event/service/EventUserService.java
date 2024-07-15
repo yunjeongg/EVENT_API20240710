@@ -6,6 +6,7 @@ import com.study.event.api.event.entity.EmailVerification;
 import com.study.event.api.event.entity.EventUser;
 import com.study.event.api.event.repository.EmailVerificationRepository;
 import com.study.event.api.event.repository.EventUserRepository;
+import com.study.event.api.exception.LoginFailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -207,11 +208,11 @@ public class EventUserService {
     public void authenticate (final LoginRequestDto dto) { // 매개변수에 final 붙이면 해당 변수는 다른 변수로 변경 불가
         // 이메일을 통해 회원정보 조회
         EventUser eventUser = eventUserRepository.findByEmail(dto.getEmail())
-                .orElseThrow(()-> new RuntimeException("가입된 회원이 아닙니다."));
+                .orElseThrow(()-> new LoginFailException("가입된 회원이 아닙니다."));
 
         // 이메일 인증을 안했거나 패스워드를 설정하지 않은 회원
         if (!eventUser.isEmailVerified() || eventUser.getPassword() == null) {
-            throw new RuntimeException("회원가입이 중단된 회원입니다. 다시 가입해주세요.");
+            throw new LoginFailException("회원가입이 중단된 회원입니다. 다시 가입해주세요.");
         }
 
         // 패스워드 검증하기
@@ -219,7 +220,8 @@ public class EventUserService {
         String encodedPassword = eventUser.getPassword(); // DB 에 있는 암호화 된 비밀번호
 
         if (!encoder.matches(inputPassword, encodedPassword)) {
-            throw new RuntimeException("비밀번호가 틀렸습니다.");
+            throw new LoginFailException("비밀번호가 틀렸습니다.");
         }
+
     }
 }

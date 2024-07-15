@@ -1,7 +1,9 @@
 package com.study.event.api.event.controller;
 
 import com.study.event.api.event.dto.request.EventUserSaveDto;
+import com.study.event.api.event.dto.request.LoginRequestDto;
 import com.study.event.api.event.service.EventUserService;
+import com.study.event.api.exception.LoginFailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,32 @@ public class EventUserController {
         return ResponseEntity.ok().body("saved success");
 
         // post, Body - raw - JSON, http://localhost:8787/auth/join
+        /*
+            {
+                "email": "aaa@gmail.com",
+                "password": "abc1234!"
+            }
+         */
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> SignIn (@RequestBody LoginRequestDto dto) {
+
+        // authenticate 메소드에서 throw 오류 하기 때문에 try catch 해줘야 한다. 여기서도 throw 하면 안됨.
+        try {
+            // 로그인 성공시
+            eventUserService.authenticate(dto);
+            return ResponseEntity.ok().body("로그인 성공하셨습니다.");
+
+        } catch (LoginFailException e) {
+            // 서비스에서 예외 발생 (로그인 실패시)
+            String errorMessage = e.getMessage();
+            return ResponseEntity.status(422) // 번호는 내가 커스텀해도 됨 (로그인실패는 422하겠다)
+                    .body(errorMessage);
+        }
+
+        // React 에서 회원가입 후 postman 에서 로그인 시도하기
+        // post, Body - raw - JSON, http://localhost:8787/auth/sign-in
         /*
             {
                 "email": "aaa@gmail.com",
