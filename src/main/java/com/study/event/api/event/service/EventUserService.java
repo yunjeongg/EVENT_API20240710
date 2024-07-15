@@ -1,5 +1,6 @@
 package com.study.event.api.event.service;
 
+import com.study.event.api.auth.TokenProvider;
 import com.study.event.api.event.dto.request.LoginRequestDto;
 import com.study.event.api.event.dto.request.EventUserSaveDto;
 import com.study.event.api.event.dto.response.LoginResponseDto;
@@ -37,6 +38,9 @@ public class EventUserService {
 
     // 패스워드 암호화 객체
     private final PasswordEncoder encoder;
+
+    // 토큰 생성 객체
+    private final TokenProvider tokenProvider;
 
     // 이메일 중복확인 처리
     public boolean checkEmailDuplicate(String email) {
@@ -236,10 +240,14 @@ public class EventUserService {
         // 쿠키는 브라우저에서만 사용가능해서 이것도 불편하다. (모바일에서 사용불가)
 
         // --> 토큰 사용 JWT (JSON Web Token)
+
+        // 토큰 생성하기
+        String token = tokenProvider.createToken(eventUser);
+
         return LoginResponseDto.builder()
                 .email(eventUser.getEmail())
                 .role(eventUser.getRole().toString())
-                .token("")
+                .token(token)
                 .build();
     }
 }
