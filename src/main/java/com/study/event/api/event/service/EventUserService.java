@@ -2,6 +2,7 @@ package com.study.event.api.event.service;
 
 import com.study.event.api.event.dto.request.LoginRequestDto;
 import com.study.event.api.event.dto.request.EventUserSaveDto;
+import com.study.event.api.event.dto.response.LoginResponseDto;
 import com.study.event.api.event.entity.EmailVerification;
 import com.study.event.api.event.entity.EventUser;
 import com.study.event.api.event.repository.EmailVerificationRepository;
@@ -205,7 +206,7 @@ public class EventUserService {
     }
 
     // 회원 인증 처리 (login)
-    public void authenticate (final LoginRequestDto dto) { // 매개변수에 final 붙이면 해당 변수는 다른 변수로 변경 불가
+    public LoginResponseDto authenticate (final LoginRequestDto dto) { // 매개변수에 final 붙이면 해당 변수는 다른 변수로 변경 불가
         // 이메일을 통해 회원정보 조회
         EventUser eventUser = eventUserRepository.findByEmail(dto.getEmail())
                 .orElseThrow(()-> new LoginFailException("가입된 회원이 아닙니다."));
@@ -223,5 +224,22 @@ public class EventUserService {
             throw new LoginFailException("비밀번호가 틀렸습니다.");
         }
 
+        // 로그인 성공한 후,
+        // 인증정보를 어떻게 관리할 것인가? 세션 or 쿠키 or 토큰
+        // 인증정보 (이메일, 닉네임, 프사, 토큰정보) 를 클라이언트에게 전송
+
+        // 기존에는 session 을 사용해 관리했었지만 리액트를 사용한 방법에서는 사용하기 불편하다.
+        // 서버의 주소(8000번)와 클라이언트(리액트 3000번)의 주소가 다르다.
+        // 웹사이트의 규모가 커졌을 경우 서버를 여러개 둬야 하는데,
+        // 세션은 서버당 1개만 가질 수 있기 때문에 서버가 늘어날수록 세션개수도 늘어나야 하기 때문에 서버간 공유가 힘들다.
+
+        // 쿠키는 브라우저에서만 사용가능해서 이것도 불편하다. (모바일에서 사용불가)
+
+        // --> 토큰 사용 JWT (JSON Web Token)
+        return LoginResponseDto.builder()
+                .email(eventUser.getEmail())
+                .role(eventUser.getRole().toString())
+                .token("")
+                .build();
     }
 }

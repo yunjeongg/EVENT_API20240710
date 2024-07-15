@@ -2,6 +2,7 @@ package com.study.event.api.event.controller;
 
 import com.study.event.api.event.dto.request.EventUserSaveDto;
 import com.study.event.api.event.dto.request.LoginRequestDto;
+import com.study.event.api.event.dto.response.LoginResponseDto;
 import com.study.event.api.event.service.EventUserService;
 import com.study.event.api.exception.LoginFailException;
 import lombok.RequiredArgsConstructor;
@@ -78,8 +79,8 @@ public class EventUserController {
         // authenticate 메소드에서 throw 오류 하기 때문에 try catch 해줘야 한다. 여기서도 throw 하면 안됨.
         try {
             // 로그인 성공시
-            eventUserService.authenticate(dto);
-            return ResponseEntity.ok().body("로그인 성공하셨습니다.");
+            LoginResponseDto responseDto = eventUserService.authenticate(dto);
+            return ResponseEntity.ok().body(responseDto);
 
         } catch (LoginFailException e) {
             // 서비스에서 예외 발생 (로그인 실패시)
