@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -23,14 +24,18 @@ public class EventController {
     @SneakyThrows
     @GetMapping("/page/{pageNo}")
     public ResponseEntity<?> getList(
+            // 토큰 파싱 결과로 로그인에 성공한 회원의 PK
+            @AuthenticationPrincipal String userId,
             @RequestParam(required = false) String sort,
             @PathVariable int pageNo) throws InterruptedException {
+
+//        log.info("token user id: {}", userId);
 
         if (sort == null) {
             return ResponseEntity.badRequest().body("sort 파라미터가 없습니다.");
         }
 
-        Map<String, Object> events = eventService.getEvents(pageNo, sort);
+        Map<String, Object> events = eventService.getEvents(pageNo, sort, userId);
 
         // 의도적으로 2초간의 로딩을 설정
         Thread.sleep(2000);
@@ -43,8 +48,9 @@ public class EventController {
 
     // 등록 요청
     @PostMapping
-    public ResponseEntity<?> register(@RequestBody EventSaveDto dto) {
-        eventService.saveEvent(dto);
+    public ResponseEntity<?> register (@AuthenticationPrincipal String userId, // JwtAuthFilter 에서 시큐리티에 등록한 데이터
+                                      @RequestBody EventSaveDto dto) {
+        eventService.saveEvent(dto, userId);
         return ResponseEntity.ok().body("event saved");
     }
 

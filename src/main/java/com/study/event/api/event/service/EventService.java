@@ -1,10 +1,13 @@
 package com.study.event.api.event.service;
 
+
 import com.study.event.api.event.dto.request.EventSaveDto;
 import com.study.event.api.event.dto.response.EventDetailDto;
 import com.study.event.api.event.dto.response.EventOneDto;
 import com.study.event.api.event.entity.Event;
+import com.study.event.api.event.entity.EventUser;
 import com.study.event.api.event.repository.EventRepository;
+import com.study.event.api.event.repository.EventUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,12 +29,14 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
+    private final EventUserRepository eventUserRepository;
+
     // 전체 조회 서비스
-    public Map<String, Object> getEvents(int pageNo, String sort) {
+    public Map<String, Object> getEvents(int pageNo, String sort, String userId) {
 
         Pageable pageable = PageRequest.of(pageNo - 1, 4);
 
-        Page<Event> eventsPage = eventRepository.findEvents(pageable, sort);
+        Page<Event> eventsPage = eventRepository.findEvents(pageable, sort, userId);
 
         // 이벤트 목록
         List<Event> events = eventsPage.getContent();
@@ -51,29 +56,37 @@ public class EventService {
     }
 
     // 이벤트 등록
-    public void saveEvent(EventSaveDto dto) {
-        Event savedEvent = eventRepository.save(dto.toEntity());
+    public void saveEvent(EventSaveDto dto, String userId) {
+
+        // 로그인한 회원 정보 조회
+        EventUser eventUser = eventUserRepository.findById(userId).orElseThrow();
+
+        Event newEvent = dto.toEntity();
+        newEvent.setEventUser(eventUser);
+
+        Event savedEvent = eventRepository.save(newEvent);
         log.info("saved event: {}", savedEvent);
     }
 
-    // 이벤트 단일조회
-    public EventOneDto getEventDetail (Long id) {
+    // 이벤트 단일 조회
+    public EventOneDto getEventDetail(Long id) {
+
         Event foundEvent = eventRepository.findById(id).orElseThrow();
 
         return new EventOneDto(foundEvent);
-
     }
 
     // 이벤트 삭제
-    public void deleteEvent (Long id) {
+    public void deleteEvent(Long id) {
         eventRepository.deleteById(id);
     }
 
     // 이벤트 수정
-    public void  modifyEvent (EventSaveDto dto, Long id) {
+    public void modifyEvent(EventSaveDto dto, Long id) {
         Event foundEvent = eventRepository.findById(id).orElseThrow();
         foundEvent.changeEvent(dto);
 
         eventRepository.save(foundEvent);
     }
+
 }
