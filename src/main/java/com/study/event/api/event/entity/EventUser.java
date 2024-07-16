@@ -6,9 +6,11 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
-@ToString
+@ToString(exclude = "eventList")
 @EqualsAndHashCode(of ="id")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,6 +45,10 @@ public class EventUser {
     @Setter
     @Column(nullable = false)
     private boolean emailVerified;
+
+    @OneToMany(mappedBy = "eventUser", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Builder.Default // 초기화 한 경우 걸어줘야 한다.
+    private List<Event> eventList = new ArrayList<>();
 
     public void confirm(String password) {
         this.password = password;
