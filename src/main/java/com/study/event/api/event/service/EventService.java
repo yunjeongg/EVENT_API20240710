@@ -63,12 +63,11 @@ public class EventService {
         // 로그인한 회원 정보 조회
         EventUser eventUser = eventUserRepository.findById(userId).orElseThrow();
 
-        // 권한에 따른 글쓰기 제한
-        if (
-                eventUser.getRole() == Role.COMMON
-                        && eventUser.getEventList().size() >= 4
-        ) {
-            throw new IllegalStateException("일반 회원은 더이상 이벤트를 등록할 수 없습니다.");
+        // 로그인한 회원 권한 조회 확인 + 등록 개수 확인
+        // 권한에 따른 글쓰기 개수 제한
+        if (eventUser.getRole() == Role.COMMON && // 회원등급이 COMMON 이면서
+                eventUser.getEventList().size() >= 4) { // 작성한 이벤트 게시글이 4개 이상이라면
+            throw new IllegalStateException("일반회원은 이벤트를 더 이상 등록할 수 없습니다.");
         }
 
         Event newEvent = dto.toEntity();

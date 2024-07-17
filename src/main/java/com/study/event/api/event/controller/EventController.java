@@ -54,8 +54,15 @@ public class EventController {
     @PostMapping
     public ResponseEntity<?> register (@AuthenticationPrincipal TokenUserInfo userInfo, // JwtAuthFilter 에서 시큐리티에 등록한 데이터
                                       @RequestBody EventSaveDto dto) {
-        eventService.saveEvent(dto, userInfo.getUserId());
-        return ResponseEntity.ok().body("event saved");
+        try {
+            eventService.saveEvent(dto, userInfo.getUserId());
+            return ResponseEntity.ok().body("event saved");
+
+        } catch (IllegalStateException e) {
+
+            log.warn(e.getMessage());
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 
     // 단일 조회 요청
