@@ -4,6 +4,7 @@ import com.study.event.api.auth.filter.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,8 @@ import org.springframework.web.filter.CorsFilter;
 // OAuth2 - SNS로그인
 @EnableWebSecurity
 @RequiredArgsConstructor
+// 컨트롤러에서 사전, 또는 사후에 권한정보를 캐치해서 막을건지 설정
+@EnableGlobalMethodSecurity (prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -44,6 +47,12 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests() // 요청 별로 인가 설정
+
+
+                // /events/* -> 뒤에 딱 하나만 붙을 수 있음
+                // /events/** -> 뒤에 여러개 붙을 수 있음
+                // "/events/*" 중 DELETE 할 때만 ADMIN 권한을 요구한다.
+                .antMatchers(HttpMethod.DELETE, "/events/*").hasAnyAuthority("ADMIN")
 
                 // 아래의 URL 요청은 모두 허용
                 .antMatchers("/", "/auth/**").permitAll() // "/auth/**" -- 모든 사용자가 로그인, 중복확인 등등 접근 가능

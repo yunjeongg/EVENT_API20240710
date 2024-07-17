@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +59,7 @@ public class EventController {
     }
 
     // 단일 조회 요청
+    @PreAuthorize("hasAuthority('PREMIUM') or hasAuthority('ADMIN')") // 사전에 인가받은 여부 (프리미엄회원만 상세조회 가능)
     @GetMapping("/{eventId}")
     public ResponseEntity<?> getEvent (@PathVariable Long eventId) {
 
@@ -78,6 +80,7 @@ public class EventController {
     // Get, http://localhost:8282/events/2 - 건강건강이벤트
 
     // 삭제요청
+    
     @DeleteMapping("/{eventId}")
     public ResponseEntity<?> delete (@PathVariable Long eventId) {
 
