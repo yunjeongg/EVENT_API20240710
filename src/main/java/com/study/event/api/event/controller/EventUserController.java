@@ -1,5 +1,6 @@
 package com.study.event.api.event.controller;
 
+import com.study.event.api.auth.TokenProvider;
 import com.study.event.api.event.dto.request.EventUserSaveDto;
 import com.study.event.api.event.dto.request.LoginRequestDto;
 import com.study.event.api.event.dto.response.LoginResponseDto;
@@ -8,7 +9,13 @@ import com.study.event.api.exception.LoginFailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
+import java.util.NoSuchElementException;
+
+import static com.study.event.api.auth.TokenProvider.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -97,5 +104,29 @@ public class EventUserController {
                 "password": "abc1234!"
             }
          */
+    }
+
+    // Premium 회원으로 등급업하는 요청처리
+    @PutMapping("/promote")
+    public ResponseEntity<?> promote (
+            @AuthenticationPrincipal TokenUserInfo userInfo
+            ) {
+
+        try {
+            LoginResponseDto dto = eventUserService.promoteToPremium(userInfo.getUserId());
+            return ResponseEntity.ok().body(dto);
+
+        } catch (NoSuchElementException e) {
+
+            log.warn(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+//        catch (SQLException e) { // 내잘못
+//            return ResponseEntity.internalServerError().body();
+//        }
+
+        // post, http://localhost:8787/auth/sign-in // 권한이 PREMIUM 이 아닌 회원 로그인 후 토큰 복사
+        // put, http://localhost:8787/auth/promote, Authorization - Bearer Token - 토큰 입력 // 해당 회원 권한 PREMIUM 으로 변경됨
+
     }
 }

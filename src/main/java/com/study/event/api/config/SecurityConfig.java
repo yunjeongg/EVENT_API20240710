@@ -54,6 +54,9 @@ public class SecurityConfig {
                 // "/events/*" 중 DELETE 할 때만 ADMIN 권한을 요구한다.
                 .antMatchers(HttpMethod.DELETE, "/events/*").hasAnyAuthority("ADMIN")
 
+                // "/auth/promote" 의 PUT 요청 은 COMMON 권한을 요구한다.
+                .antMatchers(HttpMethod.PUT, "/auth/promote").hasAnyAuthority("COMMON") // 이걸  .antMatchers("/", "/auth/**").permitAll() 아래에 놓으면 안됨.
+
                 // 아래의 URL 요청은 모두 허용
                 .antMatchers("/", "/auth/**").permitAll() // "/auth/**" -- 모든 사용자가 로그인, 중복확인 등등 접근 가능
                 // .antMatchers(HttpMethod.POST, "/events/**").hasAnyRole("VIP", "ADMIN") // 특정 권한만 접근가능

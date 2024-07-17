@@ -250,4 +250,25 @@ public class EventUserService {
                 .token(token)
                 .build();
     }
+
+    // 등업 중간처리
+    public LoginResponseDto promoteToPremium(String userId) {
+
+        // 회원 탐색하기
+        EventUser eventUser = eventUserRepository.findById(userId).orElseThrow(); // 못찾으면 에러나기 때문에 에러받아야 함.
+
+        // 해당 회원 등급 변경하기
+        eventUser.promoteToPremium(); // setter 도 권한부여가능하지만 메소드 이름으로 명확하게 뭐하는건지 지정
+        EventUser promotedUser = eventUserRepository.save(eventUser);
+
+        // 등급 변경한 내용을 업데이트한 토큰 재발급
+        String token = tokenProvider.createToken(promotedUser);
+
+        return LoginResponseDto.builder()
+                                            .token(token)
+                                            .role(promotedUser.getRole().toString())
+                                            .email(promotedUser.getEmail())
+                                            .build();
+
+    }
 }
