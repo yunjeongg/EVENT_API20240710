@@ -15,6 +15,8 @@ public class CrossOriginConfig implements WebMvcConfigurer {
             "http://localhost:3001",
             "http://localhost:3002",
             "http://localhost:3003",
+            // AWS 의 bucket 에 저장한 React
+            "http://my-event-app-12345.s3-website.ap-northeast-2.amazonaws.com"
     };
 
     @Override
